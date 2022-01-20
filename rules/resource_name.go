@@ -2,23 +2,28 @@ package rules
 
 import (
 	"fmt"
-	"strings"
+	"regexp"
 
 	"github.com/terraform-linters/tflint-plugin-sdk/tflint"
 )
 
-func NewResourceNameLowercasedRule() *BaseRule {
+const (
+	resourceNameMessageTemplate = "name should include only lowercase letters or '_' symbol, address: \"%s\""
+)
+
+func NewResourceNameRule() *BaseRule {
+	allowedSymbolsRegex := regexp.MustCompile("^[a-z_]*$")
+
 	return NewRule(
 		"resource_name_lowercased",
 		func(runner tflint.Runner, rule tflint.Rule) error {
 			cfg, _ := runner.Config()
 			for address, res := range cfg.Module.ManagedResources {
-				if res.Name != strings.ToLower(res.Name) {
+				if !allowedSymbolsRegex.MatchString(res.Name) {
 					if err := runner.EmitIssue(
 						rule,
 						fmt.Sprintf(
-							"name \"%s\" is not lowercased, address: \"%s\"",
-							res.Name,
+							resourceNameMessageTemplate,
 							address,
 						),
 						res.DeclRange,

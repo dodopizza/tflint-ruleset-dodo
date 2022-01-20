@@ -16,7 +16,7 @@ func main() {
 			Name:    "dodo",
 			Version: Version,
 			Rules: []tflint.Rule{
-				rules.NewResourceNameLowercasedRule(),
+				rules.NewResourceNameRule(),
 				rules.NewTerraformBackendTypeRule(),
 			},
 		},

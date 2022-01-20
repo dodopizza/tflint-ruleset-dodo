@@ -1,6 +1,7 @@
 package rules
 
 import (
+	"fmt"
 	"testing"
 
 	hcl "github.com/hashicorp/hcl/v2"
@@ -25,23 +26,26 @@ resource "null_resource" "test" {
 			Expected: helper.Issues{},
 		},
 		{
-			Name: "no issues again",
+			Name: "no issues example",
 			Content: `
-resource "null_resource" "example" {
+resource "null_resource" "example_without_issues" {
   name = "test"
 }`,
 			Expected: helper.Issues{},
 		},
 		{
-			Name: "issue with first letter",
+			Name: "issue with first uppercased letter",
 			Content: `
 resource "null_resource" "Test" {
   name = "test"
 }`,
 			Expected: helper.Issues{
 				{
-					Rule:    NewResourceNameLowercasedRule(),
-					Message: "name \"Test\" is not lowercased, address: \"null_resource.Test\"",
+					Rule: NewResourceNameRule(),
+					Message: fmt.Sprintf(
+						resourceNameMessageTemplate,
+						"null_resource.Test",
+					),
 					Range: hcl.Range{
 						Filename: filename,
 					},
@@ -49,7 +53,7 @@ resource "null_resource" "Test" {
 			},
 		},
 		{
-			Name: "issue with last letter",
+			Name: "issue with last letter uppercased",
 			Content: `
 resource "akamai_dns_record" "example_com_A" {
 	zone       = akamai_dns_zone.example_com.zone
@@ -60,8 +64,11 @@ resource "akamai_dns_record" "example_com_A" {
 }`,
 			Expected: helper.Issues{
 				{
-					Rule:    NewResourceNameLowercasedRule(),
-					Message: "name \"example_com_A\" is not lowercased, address: \"akamai_dns_record.example_com_A\"",
+					Rule: NewResourceNameRule(),
+					Message: fmt.Sprintf(
+						resourceNameMessageTemplate,
+						"akamai_dns_record.example_com_A",
+					),
 					Range: hcl.Range{
 						Filename: filename,
 					},
@@ -69,7 +76,7 @@ resource "akamai_dns_record" "example_com_A" {
 			},
 		},
 	}
-	rule := NewResourceNameLowercasedRule()
+	rule := NewResourceNameRule()
 
 	for _, tc := range cases {
 		tc := tc
