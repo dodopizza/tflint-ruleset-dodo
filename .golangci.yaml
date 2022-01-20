@@ -77,4 +77,4 @@ linters-settings:
   ifshort:
     max-decl-lines: 5
   lll:
-    line-length: 80
+    line-length: 120

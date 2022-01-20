@@ -41,7 +41,7 @@ resource "null_resource" "Test" {
 			Expected: helper.Issues{
 				{
 					Rule:    NewResourceNameLowercasedRule(),
-					Message: "name is not lowercased: Test",
+					Message: "name \"Test\" is not lowercased, address: \"null_resource.Test\"",
 					Range: hcl.Range{
 						Filename: filename,
 					},
@@ -61,7 +61,7 @@ resource "akamai_dns_record" "example_com_A" {
 			Expected: helper.Issues{
 				{
 					Rule:    NewResourceNameLowercasedRule(),
-					Message: "name is not lowercased: example_com_A",
+					Message: "name \"example_com_A\" is not lowercased, address: \"akamai_dns_record.example_com_A\"",
 					Range: hcl.Range{
 						Filename: filename,
 					},
