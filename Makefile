@@ -1,11 +1,16 @@
-default: build
+default: check
 
+.PHONY: check
+check: tidy lint test
+
+.PHONY: tidy
+tidy:
+	go mod tidy -v
+
+.PHONY: test
 test:
-	go test ./...
+	TEST_RUN_ARGS="$(TEST_RUN_ARGS)" TEST_DIR="$(TEST_DIR)" ./hacks/run-tests.sh
 
-build:
-	go build
-
-install: build
-	mkdir -p ~/.tflint.d/plugins
-	mv ./tflint-ruleset-template ~/.tflint.d/plugins
+.PHONY: lint
+lint:
+	golangci-lint run

@@ -1,0 +1,80 @@
+run:
+  timeout: 5m
+
+issues:
+  fix: true
+  exclude-rules:
+  - source: ".*github.com/dodopizza/tflint-ruleset-dodo.*"
+    linters:
+    - lll
+  - source: ".*`[a-z]+:\".+\".*`"
+    linters:
+    - lll
+
+linters:
+  enable:
+  - asciicheck
+  - deadcode
+  - dupl
+  - durationcheck
+  - errcheck
+  - errorlint
+  - exportloopref
+  - gci
+  - gochecknoinits
+  - gocognit
+  - goconst
+  - gocritic
+  - godot
+  - goimports
+  - gomnd
+  - gosec
+  - gosimple
+  - govet
+  - ifshort
+  - importas
+  - ineffassign
+  - lll
+  - makezero
+  - misspell
+  - nestif
+  - nilerr
+  - nlreturn
+  - nolintlint
+  - staticcheck
+  - structcheck
+  - thelper
+  - tparallel
+  - typecheck
+  - unconvert
+  - unparam
+  - unused
+  - varcheck
+  - wastedassign
+  - whitespace
+  - revive
+
+linters-settings:
+  gci:
+    local-prefixes: github.com/dodopizza/tflint-ruleset-dodo
+  gocritic:
+    disabled-checks:
+    - exitAfterDefer
+  godot:
+    scope: all
+    capital: true
+  gomnd:
+    settings:
+      mnd:
+        checks:
+        - argument
+        - case
+        - condition
+        - operation
+        - return
+        ignored-numbers:
+        - 2
+  ifshort:
+    max-decl-lines: 5
+  lll:
+    line-length: 80
