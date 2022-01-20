@@ -38,12 +38,17 @@ jobs:
           echo 'run `make tidy` and commit changes'
           exit 1
         fi
-    - name: Run linters
-      run: make lint
+    - name: Lint
+      uses: golangci/golangci-lint-action@v2
+      with:
+        version: v1.43
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        args: "--fix=false"
     - name: Run tests
       run: make test
 
   release:
+    name: Release
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags')
     needs:
