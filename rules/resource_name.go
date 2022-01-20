@@ -12,7 +12,7 @@ const (
 )
 
 func NewResourceNameRule() *BaseRule {
-	allowedSymbolsRegex := regexp.MustCompile("^[a-z_]*$")
+	allowedSymbolsRegex := regexp.MustCompile("^[a-z0-9_]*$")
 
 	return NewRule(
 		"resource_name_lowercased",

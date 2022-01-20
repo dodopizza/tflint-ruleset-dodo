@@ -75,6 +75,18 @@ resource "akamai_dns_record" "example_com_A" {
 				},
 			},
 		},
+		{
+			Name: "complex name but without issues",
+			Content: `
+resource "akamai_dns_record" "_d0c0f9785212b9b62abeb1d0c54a4e5a_example_com_cname" {
+	zone       = akamai_dns_zone.example_com.zone
+	target     = ["cname.example.org"]
+	name       = "_d0c0f9785212b9b62abeb1d0c54a4e5a.example.com"
+	recordtype = "CNAME"
+	ttl        = 3600
+}`,
+			Expected: helper.Issues{},
+		},
 	}
 	rule := NewResourceNameRule()
 
