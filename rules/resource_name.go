@@ -8,14 +8,14 @@ import (
 )
 
 const (
-	resourceNameMessageTemplate = "name should include only lowercase letters or '_' symbol, address: \"%s\""
+	resourceNameMessageTemplate = "name should include only lowercase letters, digits or '_' symbol, address: \"%s\""
 )
 
 func NewResourceNameRule() *BaseRule {
 	allowedSymbolsRegex := regexp.MustCompile("^[a-z0-9_]*$")
 
 	return NewRule(
-		"resource_name_lowercased",
+		"resource_name",
 		func(runner tflint.Runner, rule tflint.Rule) error {
 			cfg, _ := runner.Config()
 			for address, res := range cfg.Module.ManagedResources {
