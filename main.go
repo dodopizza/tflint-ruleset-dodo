@@ -7,14 +7,13 @@ import (
 	"github.com/dodopizza/tflint-ruleset-dodo/rules"
 )
 
-// Version to override during build.
-var Version = "0.1.0"
+var version = "0.1.0"
 
 func main() {
 	plugin.Serve(&plugin.ServeOpts{
 		RuleSet: &tflint.BuiltinRuleSet{
 			Name:    "dodo",
-			Version: Version,
+			Version: version,
 			Rules: []tflint.Rule{
 				rules.NewResourceNameRule(),
 				rules.NewTerraformBackendTypeRule(),
