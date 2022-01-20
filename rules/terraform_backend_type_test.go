@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	hcl "github.com/hashicorp/hcl/v2"
+	"github.com/stretchr/testify/require"
 	"github.com/terraform-linters/tflint-plugin-sdk/helper"
 )
 
@@ -14,21 +15,34 @@ func Test_TerraformBackendType(t *testing.T) {
 		Expected helper.Issues
 	}{
 		{
+			Name: "no issues",
+			Content: `
+terraform {
+	backend "azurerm" {
+		resource_group_name  = "rg"
+		storage_account_name = "sa"
+		container_name       = "tfstate"
+		key    							 = "path/to/my/key"
+	}
+}`,
+			Expected: helper.Issues{},
+		},
+		{
 			Name: "issue found",
 			Content: `
 terraform {
   backend "s3" {
-	bucket = "mybucket"
-	key    = "path/to/my/key"
+		bucket = "mybucket"
+		key    = "path/to/my/key"
     region = "us-east-1"
   }
 }`,
 			Expected: helper.Issues{
 				{
 					Rule:    NewTerraformBackendTypeRule(),
-					Message: "backend type is s3",
+					Message: "backend type should be \"azurerm\" but defined: \"s3\"",
 					Range: hcl.Range{
-						Filename: "resource.tf",
+						Filename: filename,
 						Start:    hcl.Pos{Line: 3, Column: 3},
 						End:      hcl.Pos{Line: 3, Column: 15},
 					},
@@ -40,12 +54,12 @@ terraform {
 	rule := NewTerraformBackendTypeRule()
 
 	for _, tc := range cases {
-		runner := helper.TestRunner(t, map[string]string{"resource.tf": tc.Content})
+		tc := tc
+		t.Run(tc.Name, func(t *testing.T) {
+			runner := helper.TestRunner(t, map[string]string{filename: tc.Content})
 
-		if err := rule.Check(runner); err != nil {
-			t.Fatalf("Unexpected error occurred: %s", err)
-		}
-
-		helper.AssertIssues(t, tc.Expected, runner.Issues)
+			require.NoError(t, rule.Check(runner))
+			helper.AssertIssues(t, tc.Expected, runner.Issues)
+		})
 	}
 }
