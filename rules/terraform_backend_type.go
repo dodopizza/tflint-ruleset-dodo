@@ -6,47 +6,32 @@ import (
 	"github.com/terraform-linters/tflint-plugin-sdk/tflint"
 )
 
-// TerraformBackendTypeRule checks whether ...
 type TerraformBackendTypeRule struct{}
 
-// NewTerraformBackendTypeRule returns a new rule
-func NewTerraformBackendTypeRule() *TerraformBackendTypeRule {
-	return &TerraformBackendTypeRule{}
-}
+func NewTerraformBackendTypeRule() *BaseRule {
+	return NewRule(
+		"terraform_backend_type",
+		func(runner tflint.Runner, rule tflint.Rule) error {
+			backend, err := runner.Backend()
+			if err != nil {
+				return err
+			}
+			if backend == nil {
+				return nil
+			}
 
-// Name returns the rule name
-func (r *TerraformBackendTypeRule) Name() string {
-	return "terraform_backend_type"
-}
+			if backend.Type != "azurerm" {
+				return runner.EmitIssue(
+					rule,
+					fmt.Sprintf(
+						"backend type should be \"azurerm\" but defined: \"%s\"",
+						backend.Type,
+					),
+					backend.DeclRange,
+				)
+			}
 
-// Enabled returns whether the rule is enabled by default
-func (r *TerraformBackendTypeRule) Enabled() bool {
-	return true
-}
-
-// Severity returns the rule severity
-func (r *TerraformBackendTypeRule) Severity() string {
-	return tflint.ERROR
-}
-
-// Link returns the rule reference link
-func (r *TerraformBackendTypeRule) Link() string {
-	return ""
-}
-
-// Check checks whether ...
-func (r *TerraformBackendTypeRule) Check(runner tflint.Runner) error {
-	backend, err := runner.Backend()
-	if err != nil {
-		return err
-	}
-	if backend == nil {
-		return nil
-	}
-
-	return runner.EmitIssue(
-		r,
-		fmt.Sprintf("backend type is %s", backend.Type),
-		backend.DeclRange,
+			return nil
+		},
 	)
 }
