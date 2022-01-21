@@ -8,7 +8,7 @@ import (
 	"github.com/terraform-linters/tflint-plugin-sdk/tflint"
 )
 
-var (
+const (
 	emptyFirstLineMessageTemplate  = "File \"%s\" is starting with empty string"
 	noSpaceBetweenObjectsMessage   = "There is no empty line after object"
 	noNewLineAtTheEndOfFileMessage = "There is no empty line at the end of file"

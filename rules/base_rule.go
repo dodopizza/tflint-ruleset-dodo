@@ -1,8 +1,12 @@
 package rules
 
 import (
+	"fmt"
+
 	"github.com/terraform-linters/tflint-plugin-sdk/tflint"
 )
+
+const rulePrefix = "dodo"
 
 type BaseRule struct {
 	name      string
@@ -16,27 +20,37 @@ func NewRule(
 	checkFunc func(tflint.Runner, tflint.Rule) error,
 ) *BaseRule {
 	return &BaseRule{
-		name:      name,
+		name:      fmt.Sprintf("%s_%s", rulePrefix, name),
 		checkFunc: checkFunc,
 	}
 }
 
-func (r *BaseRule) Name() string {
-	return r.name
+func (rule *BaseRule) Name() string {
+	return rule.name
 }
 
-func (r *BaseRule) Enabled() bool {
+func (rule *BaseRule) Enabled() bool {
 	return true
 }
 
-func (r *BaseRule) Severity() string {
+func (rule *BaseRule) Severity() string {
 	return tflint.ERROR
 }
 
-func (r *BaseRule) Link() string {
+func (rule *BaseRule) Link() string {
 	return ""
 }
 
-func (r *BaseRule) Check(runner tflint.Runner) error {
-	return r.checkFunc(runner, r)
+func (rule *BaseRule) Check(runner tflint.Runner) error {
+	config, err := runner.Config()
+	if err != nil {
+		return err
+	}
+
+	// Check if it is child module and do not evaluate them.
+	if len(config.Path) != 0 {
+		return nil
+	}
+
+	return rule.checkFunc(runner, rule)
 }
