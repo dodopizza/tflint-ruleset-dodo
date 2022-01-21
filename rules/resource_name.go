@@ -17,7 +17,11 @@ func NewResourceNameRule() *BaseRule {
 	return NewRule(
 		"resource_name",
 		func(runner tflint.Runner, rule tflint.Rule) error {
-			cfg, _ := runner.Config()
+			cfg, err := runner.Config()
+			if err != nil {
+				return err
+			}
+
 			for address, res := range cfg.Module.ManagedResources {
 				if !allowedSymbolsRegex.MatchString(res.Name) {
 					if err := runner.EmitIssue(

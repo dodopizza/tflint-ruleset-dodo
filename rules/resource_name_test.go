@@ -9,7 +9,7 @@ import (
 	"github.com/terraform-linters/tflint-plugin-sdk/helper"
 )
 
-func Test_ResourceNameLowercased(t *testing.T) {
+func Test_ResourceName(t *testing.T) {
 	t.Parallel()
 
 	cases := []struct {
