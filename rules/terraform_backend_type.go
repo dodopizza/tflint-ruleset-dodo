@@ -6,7 +6,9 @@ import (
 	"github.com/terraform-linters/tflint-plugin-sdk/tflint"
 )
 
-type TerraformBackendTypeRule struct{}
+const (
+	backendTypeMessageTemplate = "backend type should be \"azurerm\" but defined: \"%s\""
+)
 
 func NewTerraformBackendTypeRule() *BaseRule {
 	return NewRule(
@@ -24,7 +26,7 @@ func NewTerraformBackendTypeRule() *BaseRule {
 				return runner.EmitIssue(
 					rule,
 					fmt.Sprintf(
-						"backend type should be \"azurerm\" but defined: \"%s\"",
+						backendTypeMessageTemplate,
 						backend.Type,
 					),
 					backend.DeclRange,

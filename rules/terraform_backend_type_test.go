@@ -1,6 +1,7 @@
 package rules
 
 import (
+	"fmt"
 	"testing"
 
 	hcl "github.com/hashicorp/hcl/v2"
@@ -39,8 +40,11 @@ terraform {
 }`,
 			Expected: helper.Issues{
 				{
-					Rule:    NewTerraformBackendTypeRule(),
-					Message: "backend type should be \"azurerm\" but defined: \"s3\"",
+					Rule: NewTerraformBackendTypeRule(),
+					Message: fmt.Sprintf(
+						backendTypeMessageTemplate,
+						"s3",
+					),
 					Range: hcl.Range{
 						Filename: filename,
 						Start:    hcl.Pos{Line: 3, Column: 3},
