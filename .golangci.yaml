@@ -78,3 +78,5 @@ linters-settings:
     max-decl-lines: 5
   lll:
     line-length: 120
+  nlreturn:
+    block-size: 3

@@ -11,7 +11,7 @@ const (
 	backendTypeMessageTemplate = "backend type should be \"%s\" but defined: \"%s\""
 )
 
-func NewTerraformBackendTypeRule() *BaseRule {
+func NewBackendTypeRule() *Rule {
 	return NewRule(
 		"backend_type",
 		func(runner tflint.Runner, rule tflint.Rule) error {

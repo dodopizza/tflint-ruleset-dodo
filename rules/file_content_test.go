@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/hcl/v2"
+	hcl "github.com/hashicorp/hcl/v2"
 	"github.com/stretchr/testify/require"
 	"github.com/terraform-linters/tflint-plugin-sdk/helper"
 )
@@ -26,13 +26,48 @@ func Test_FileContent(t *testing.T) {
 			Expected: helper.Issues{},
 		},
 		{
+			Name:     "no issues with empty file",
+			Content:  ``,
+			Expected: helper.Issues{},
+		},
+		{
 			Name: "no issues with multiple resources",
 			Content: `resource "null_resource" "test" {
-  name = "test"
+	name = "test"
 }
 
 resource "null_resource" "another_test" {
-  name = "another_test"
+	name = "another_test"
+}
+`,
+			Expected: helper.Issues{},
+		},
+		{
+			Name: "no issues with nested object",
+			Content: `resource "null_resource" "test" {
+	config {
+		key = "value"
+		other_key = "value"
+
+		object {
+			key = "value"
+			other_key = "value"
+		}
+
+		object {
+			key = "value"
+			other_key = "value"
+		}
+	}
+
+	config {
+		other_key = "value"
+
+		object {
+			key = "value"
+			other_key = "value"
+		}
+	}
 }
 `,
 			Expected: helper.Issues{},
@@ -41,12 +76,24 @@ resource "null_resource" "another_test" {
 			Name: "no issues with multiple resources and comments",
 			Content: `// test resource
 resource "null_resource" "test" {
-  name = "test"
+	name = "test"
 }
 // - test resource
 
 resource "null_resource" "another_test" {
-  name = "another_test"
+	name = "another_test"
+}
+`,
+			Expected: helper.Issues{},
+		},
+		{
+			Name: "no issues with heredocs object",
+			Content: `resource "null_resource" "test" {
+	name = <<EOF
+{
+		"key": "value"
+}
+EOF
 }
 `,
 			Expected: helper.Issues{},
@@ -55,7 +102,7 @@ resource "null_resource" "another_test" {
 			Name: "empty first line",
 			Content: `
 resource "null_resource" "test" {
-  name = "test"
+	name = "test"
 }
 `,
 			Expected: helper.Issues{
@@ -76,7 +123,7 @@ resource "null_resource" "test" {
 		{
 			Name: "no new line at the end",
 			Content: `resource "null_resource" "test" {
-  name = "test"
+	name = "test"
 }`,
 			Expected: helper.Issues{
 				{
@@ -97,23 +144,25 @@ resource "null_resource" "test" {
 		{
 			Name: "no new line between resources",
 			Content: `resource "null_resource" "test" {
-  name = "test"
+	name = "test"
 }
 resource "null_resource" "another_test" {
-  name = "another_test"
+	name = "another_test"
 }
 `,
 			Expected: helper.Issues{
 				{
 					Rule:    NewFileContentRule(),
-					Message: noSpaceBetweenObjectsMessage,
+					Message: spaceBetweenObjectsMessage,
 					Range: hcl.Range{
 						Filename: filename,
 						Start: hcl.Pos{
-							Line: 4,
+							Line:   4,
+							Column: 1,
 						},
 						End: hcl.Pos{
-							Line: 4,
+							Line:   4,
+							Column: 9,
 						},
 					},
 				},
@@ -123,24 +172,26 @@ resource "null_resource" "another_test" {
 			Name: "no new line between resources with comments",
 			Content: `// null resource
 resource "null_resource" "test" {
-  name = "test"
+	name = "test"
 }
 // - null resource
 resource "null_resource" "another_test" {
-  name = "another_test"
+	name = "another_test"
 }
 `,
 			Expected: helper.Issues{
 				{
 					Rule:    NewFileContentRule(),
-					Message: noSpaceBetweenObjectsMessage,
+					Message: spaceBetweenObjectsMessage,
 					Range: hcl.Range{
 						Filename: filename,
 						Start: hcl.Pos{
-							Line: 6,
+							Line:   6,
+							Column: 1,
 						},
 						End: hcl.Pos{
-							Line: 6,
+							Line:   6,
+							Column: 9,
 						},
 					},
 				},
