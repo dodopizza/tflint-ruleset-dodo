@@ -43,6 +43,7 @@ terraform {
 					Rule: NewTerraformBackendTypeRule(),
 					Message: fmt.Sprintf(
 						backendTypeMessageTemplate,
+						requiredBackendType,
 						"s3",
 					),
 					Range: hcl.Range{
