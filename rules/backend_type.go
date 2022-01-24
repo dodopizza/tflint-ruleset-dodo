@@ -7,12 +7,13 @@ import (
 )
 
 const (
-	backendTypeMessageTemplate = "backend type should be \"azurerm\" but defined: \"%s\""
+	requiredBackendType        = "azurerm"
+	backendTypeMessageTemplate = "backend type should be \"%s\" but defined: \"%s\""
 )
 
 func NewTerraformBackendTypeRule() *BaseRule {
 	return NewRule(
-		"terraform_backend_type",
+		"backend_type",
 		func(runner tflint.Runner, rule tflint.Rule) error {
 			backend, err := runner.Backend()
 			if err != nil {
@@ -22,11 +23,12 @@ func NewTerraformBackendTypeRule() *BaseRule {
 				return nil
 			}
 
-			if backend.Type != "azurerm" {
+			if backend.Type != requiredBackendType {
 				return runner.EmitIssue(
 					rule,
 					fmt.Sprintf(
 						backendTypeMessageTemplate,
+						requiredBackendType,
 						backend.Type,
 					),
 					backend.DeclRange,
