@@ -8,40 +8,40 @@ import (
 
 const rulePrefix = "dodo"
 
-type BaseRule struct {
+type Rule struct {
 	name      string
 	checkFunc func(tflint.Runner, tflint.Rule) error
 }
 
-var _ tflint.Rule = &BaseRule{}
+var _ tflint.Rule = &Rule{}
 
 func NewRule(
 	name string,
 	checkFunc func(tflint.Runner, tflint.Rule) error,
-) *BaseRule {
-	return &BaseRule{
+) *Rule {
+	return &Rule{
 		name:      fmt.Sprintf("%s_%s", rulePrefix, name),
 		checkFunc: checkFunc,
 	}
 }
 
-func (rule *BaseRule) Name() string {
+func (rule *Rule) Name() string {
 	return rule.name
 }
 
-func (rule *BaseRule) Enabled() bool {
+func (rule *Rule) Enabled() bool {
 	return true
 }
 
-func (rule *BaseRule) Severity() string {
+func (rule *Rule) Severity() string {
 	return tflint.ERROR
 }
 
-func (rule *BaseRule) Link() string {
+func (rule *Rule) Link() string {
 	return ""
 }
 
-func (rule *BaseRule) Check(runner tflint.Runner) error {
+func (rule *Rule) Check(runner tflint.Runner) error {
 	config, err := runner.Config()
 	if err != nil {
 		return err

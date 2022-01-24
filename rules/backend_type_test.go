@@ -9,7 +9,7 @@ import (
 	"github.com/terraform-linters/tflint-plugin-sdk/helper"
 )
 
-func Test_TerraformBackendType(t *testing.T) {
+func Test_BackendType(t *testing.T) {
 	cases := []struct {
 		Name     string
 		Content  string
@@ -40,7 +40,7 @@ terraform {
 }`,
 			Expected: helper.Issues{
 				{
-					Rule: NewTerraformBackendTypeRule(),
+					Rule: NewBackendTypeRule(),
 					Message: fmt.Sprintf(
 						backendTypeMessageTemplate,
 						requiredBackendType,
@@ -56,7 +56,7 @@ terraform {
 		},
 	}
 
-	rule := NewTerraformBackendTypeRule()
+	rule := NewBackendTypeRule()
 
 	for _, tc := range cases {
 		tc := tc

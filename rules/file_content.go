@@ -5,16 +5,17 @@ import (
 	"strings"
 
 	"github.com/hashicorp/hcl/v2"
+	"github.com/hashicorp/hcl/v2/hclsyntax"
 	"github.com/terraform-linters/tflint-plugin-sdk/tflint"
 )
 
 const (
 	emptyFirstLineMessageTemplate  = "File \"%s\" is starting with empty string"
-	noSpaceBetweenObjectsMessage   = "There is no empty line after object"
+	spaceBetweenObjectsMessage     = "Objects should be delimited with one empty line"
 	noNewLineAtTheEndOfFileMessage = "There is no empty line at the end of file"
 )
 
-func NewFileContentRule() *BaseRule {
+func NewFileContentRule() *Rule {
 	return NewRule(
 		"file_content",
 		func(runner tflint.Runner, rule tflint.Rule) error {
@@ -25,6 +26,9 @@ func NewFileContentRule() *BaseRule {
 
 			for filename, file := range files {
 				if err := checkFirstLine(runner, rule, filename, file); err != nil {
+					return err
+				}
+				if err := checkLastLine(runner, rule, filename, file); err != nil {
 					return err
 				}
 				if err := checkSpaceBetweenObjects(runner, rule, filename, file); err != nil {
@@ -44,7 +48,7 @@ func checkFirstLine(
 	file *hcl.File,
 ) error {
 	lines := strings.Split(string(file.Bytes), "\n")
-	if strings.Trim(lines[0], " ") != "" {
+	if strings.Trim(lines[0], " ") != "" || len(lines) == 1 {
 		return nil
 	}
 
@@ -63,68 +67,90 @@ func checkFirstLine(
 	return nil
 }
 
-func checkSpaceBetweenObjects(
+func checkLastLine(
 	runner tflint.Runner,
 	rule tflint.Rule,
 	filename string,
 	file *hcl.File,
 ) error {
 	lines := strings.Split(string(file.Bytes), "\n")
+	if lines[len(lines)-1] == "" {
+		return nil
+	}
+
+	if err := runner.EmitIssue(
+		rule,
+		noNewLineAtTheEndOfFileMessage,
+		hcl.Range{
+			Filename: filename,
+			Start: hcl.Pos{
+				Line: len(lines),
+			},
+			End: hcl.Pos{
+				Line: len(lines),
+			},
+		},
+	); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func checkSpaceBetweenObjects(
+	runner tflint.Runner,
+	rule tflint.Rule,
+	filename string,
+	file *hcl.File,
+) error {
+	if strings.HasSuffix(filename, ".json") {
+		return nil
+	}
+
+	tokens, diags := hclsyntax.LexConfig(file.Bytes, filename, hcl.InitialPos)
+	if diags.HasErrors() {
+		return diags
+	}
 
 	var endOfObjectFound bool
-	for i := 0; i < len(lines); i++ {
-		if lines[i] == "}" {
+	for i := 0; i < len(tokens); i++ {
+		if tokens[i].Type == hclsyntax.TokenCBrace {
 			endOfObjectFound = true
-
 			continue
 		}
 		if !endOfObjectFound {
 			continue
 		}
-		if strings.HasPrefix(lines[i], "#") ||
-			strings.HasPrefix(lines[i], "//") {
-			continue
-		}
-		if lines[i] == "" {
-			endOfObjectFound = false
+		var newlineCounter int
+		for {
+			if tokens[i].Type == hclsyntax.TokenNewline {
+				newlineCounter++
+				i++
+				continue
+			}
+			if tokens[i].Type == hclsyntax.TokenCBrace {
+				newlineCounter = 0
+				i++
+				continue
+			}
+			if tokens[i].Type == hclsyntax.TokenComment {
+				i++
+				continue
+			}
 
-			continue
+			break
 		}
-
-		if err := runner.EmitIssue(
-			rule,
-			noSpaceBetweenObjectsMessage,
-			hcl.Range{
-				Filename: filename,
-				Start: hcl.Pos{
-					Line: i + 1,
-				},
-				End: hcl.Pos{
-					Line: i + 1,
-				},
-			},
-		); err != nil {
-			return err
+		if newlineCounter != 2 &&
+			tokens[i].Type != hclsyntax.TokenEOF {
+			if err := runner.EmitIssue(
+				rule,
+				spaceBetweenObjectsMessage,
+				tokens[i].Range,
+			); err != nil {
+				return err
+			}
 		}
-
 		endOfObjectFound = false
-	}
-	if endOfObjectFound {
-		if err := runner.EmitIssue(
-			rule,
-			noNewLineAtTheEndOfFileMessage,
-			hcl.Range{
-				Filename: filename,
-				Start: hcl.Pos{
-					Line: len(lines),
-				},
-				End: hcl.Pos{
-					Line: len(lines),
-				},
-			},
-		); err != nil {
-			return err
-		}
 	}
 
 	return nil

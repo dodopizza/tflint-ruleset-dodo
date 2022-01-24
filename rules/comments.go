@@ -10,7 +10,7 @@ import (
 
 const commentsMessage = "Single line comments should begin with \"//\""
 
-func NewCommentsRule() *BaseRule {
+func NewCommentsRule() *Rule {
 	return NewRule(
 		"comments",
 		func(runner tflint.Runner, rule tflint.Rule) error {
