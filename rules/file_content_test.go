@@ -99,6 +99,14 @@ EOF
 			Expected: helper.Issues{},
 		},
 		{
+			Name: "no issues with object in function",
+			Content: `resource "null_resource" "test" {
+	data = templatefile("${path.module}/file.txt", { token = "${var.token}" })
+}
+`,
+			Expected: helper.Issues{},
+		},
+		{
 			Name: "empty first line",
 			Content: `
 resource "null_resource" "test" {

@@ -113,14 +113,24 @@ func checkSpaceBetweenObjects(
 	}
 
 	var endOfObjectFound bool
+	var depth int
 	for i := 0; i < len(tokens); i++ {
+		if tokens[i].Type == hclsyntax.TokenOBrace {
+			depth++
+			continue
+		}
 		if tokens[i].Type == hclsyntax.TokenCBrace {
-			endOfObjectFound = true
+			depth--
+			if depth == 0 {
+				endOfObjectFound = true
+			}
+
 			continue
 		}
 		if !endOfObjectFound {
 			continue
 		}
+
 		var newlineCounter int
 		for {
 			if tokens[i].Type == hclsyntax.TokenNewline {
