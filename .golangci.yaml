@@ -80,3 +80,5 @@ linters-settings:
     line-length: 120
   nlreturn:
     block-size: 3
+  gocognit:
+    min-complexity: 50
