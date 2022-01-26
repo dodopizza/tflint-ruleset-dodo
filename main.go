@@ -18,6 +18,7 @@ func main() {
 				rules.NewBackendTypeRule(),
 				rules.NewFileContentRule(),
 				rules.NewCommentsRule(),
+				rules.NewForeachCountRule(),
 			},
 		},
 	})
