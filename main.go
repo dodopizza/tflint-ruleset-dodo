@@ -19,6 +19,7 @@ func main() {
 				rules.NewFileContentRule(),
 				rules.NewCommentsRule(),
 				rules.NewForeachCountRule(),
+				rules.NewModuleStructureRule(),
 			},
 		},
 	})
