@@ -84,7 +84,88 @@ func Test_ModuleStructure(t *testing.T) {
 						},
 						End: hcl.Pos{
 							Line:   1,
-							Column: 14,
+							Column: 31,
+						},
+					},
+				},
+			},
+		},
+		{
+			Name: "resource in variables file",
+			Content: map[string]string{
+				variablesFile: `resource "null_resource" "test" {}`,
+			},
+			Expected: helper.Issues{
+				{
+					Rule: NewModuleStructureRule(),
+					Message: fmt.Sprintf(
+						wrongResourceTypeMessageTemplate,
+						variablesFile,
+						"variables",
+					),
+					Range: hcl.Range{
+						Filename: variablesFile,
+						Start: hcl.Pos{
+							Line:   1,
+							Column: 1,
+						},
+						End: hcl.Pos{
+							Line:   1,
+							Column: 35,
+						},
+					},
+				},
+			},
+		},
+		{
+			Name: "locals in variables file",
+			Content: map[string]string{
+				variablesFile: `locals { test = "test" }`,
+			},
+			Expected: helper.Issues{
+				{
+					Rule: NewModuleStructureRule(),
+					Message: fmt.Sprintf(
+						wrongResourceTypeMessageTemplate,
+						variablesFile,
+						"variables",
+					),
+					Range: hcl.Range{
+						Filename: variablesFile,
+						Start: hcl.Pos{
+							Line:   1,
+							Column: 1,
+						},
+						End: hcl.Pos{
+							Line:   1,
+							Column: 25,
+						},
+					},
+				},
+			},
+		},
+		{
+			Name: "resource in outputs file",
+			Content: map[string]string{
+				outputsFile: `resource "null_resource" "test" {}`,
+			},
+			Expected: helper.Issues{
+				{
+					Rule: NewModuleStructureRule(),
+					Message: fmt.Sprintf(
+						wrongResourceTypeMessageTemplate,
+						outputsFile,
+						"outputs",
+					),
+					Range: hcl.Range{
+						Filename: outputsFile,
+						Start: hcl.Pos{
+							Line:   1,
+							Column: 1,
+						},
+						End: hcl.Pos{
+							Line:   1,
+							Column: 35,
 						},
 					},
 				},
