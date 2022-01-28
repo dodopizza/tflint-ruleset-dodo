@@ -27,8 +27,8 @@ func Test_ModuleStructure(t *testing.T) {
 		{
 			Name: "no issues with values",
 			Content: map[string]string{
-				variablesFile: `variable "test" {}`,
-				outputsFile:   `output "o" { value = null }`,
+				variablesFilename: `variable "test" {}`,
+				outputsFilename:   `output "o" { value = null }`,
 			},
 			Expected: helper.Issues{},
 		},
@@ -45,7 +45,7 @@ func Test_ModuleStructure(t *testing.T) {
 						"variable",
 						"test",
 						filename,
-						variablesFile,
+						variablesFilename,
 					),
 					Range: hcl.Range{
 						Filename: filename,
@@ -74,7 +74,7 @@ func Test_ModuleStructure(t *testing.T) {
 						"output",
 						"test",
 						filename,
-						outputsFile,
+						outputsFilename,
 					),
 					Range: hcl.Range{
 						Filename: filename,
@@ -93,18 +93,18 @@ func Test_ModuleStructure(t *testing.T) {
 		{
 			Name: "resource in variables file",
 			Content: map[string]string{
-				variablesFile: `resource "null_resource" "test" {}`,
+				variablesFilename: `resource "null_resource" "test" {}`,
 			},
 			Expected: helper.Issues{
 				{
 					Rule: NewModuleStructureRule(),
 					Message: fmt.Sprintf(
 						wrongResourceTypeMessageTemplate,
-						variablesFile,
+						variablesFilename,
 						"variables",
 					),
 					Range: hcl.Range{
-						Filename: variablesFile,
+						Filename: variablesFilename,
 						Start: hcl.Pos{
 							Line:   1,
 							Column: 1,
@@ -120,18 +120,18 @@ func Test_ModuleStructure(t *testing.T) {
 		{
 			Name: "locals in variables file",
 			Content: map[string]string{
-				variablesFile: `locals { test = "test" }`,
+				variablesFilename: `locals { test = "test" }`,
 			},
 			Expected: helper.Issues{
 				{
 					Rule: NewModuleStructureRule(),
 					Message: fmt.Sprintf(
 						wrongResourceTypeMessageTemplate,
-						variablesFile,
+						variablesFilename,
 						"variables",
 					),
 					Range: hcl.Range{
-						Filename: variablesFile,
+						Filename: variablesFilename,
 						Start: hcl.Pos{
 							Line:   1,
 							Column: 1,
@@ -147,18 +147,18 @@ func Test_ModuleStructure(t *testing.T) {
 		{
 			Name: "resource in outputs file",
 			Content: map[string]string{
-				outputsFile: `resource "null_resource" "test" {}`,
+				outputsFilename: `resource "null_resource" "test" {}`,
 			},
 			Expected: helper.Issues{
 				{
 					Rule: NewModuleStructureRule(),
 					Message: fmt.Sprintf(
 						wrongResourceTypeMessageTemplate,
-						outputsFile,
+						outputsFilename,
 						"outputs",
 					),
 					Range: hcl.Range{
-						Filename: outputsFile,
+						Filename: outputsFilename,
 						Start: hcl.Pos{
 							Line:   1,
 							Column: 1,
