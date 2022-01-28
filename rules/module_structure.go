@@ -2,15 +2,17 @@ package rules
 
 import (
 	"fmt"
+	"path/filepath"
 
+	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hclsyntax"
 	"github.com/terraform-linters/tflint-plugin-sdk/terraform/configs"
 	"github.com/terraform-linters/tflint-plugin-sdk/tflint"
 )
 
 const (
-	variablesFile = "variables.tf"
-	outputsFile   = "outputs.tf"
+	variablesFilename = "variables.tf"
+	outputsFilename   = "outputs.tf"
 )
 
 const (
@@ -41,15 +43,21 @@ func NewModuleStructureRule() *Rule {
 }
 
 func checkVariablesFile(runner tflint.Runner, rule tflint.Rule) error {
-	file, err := runner.File(variablesFile)
+	files, err := runner.Files()
 	if err != nil {
 		return err
 	}
-	if file == nil {
+	var variablesFile *hcl.File
+	for filename, file := range files {
+		if filepath.Base(filename) == variablesFilename {
+			variablesFile = file
+		}
+	}
+	if variablesFile == nil {
 		return nil
 	}
 
-	body, ok := file.Body.(*hclsyntax.Body)
+	body, ok := variablesFile.Body.(*hclsyntax.Body)
 	if !ok {
 		return nil
 	}
@@ -59,7 +67,7 @@ func checkVariablesFile(runner tflint.Runner, rule tflint.Rule) error {
 				rule,
 				fmt.Sprintf(
 					wrongResourceTypeMessageTemplate,
-					variablesFile,
+					block.Range().Filename,
 					"variables",
 				),
 				block.Range(),
@@ -76,7 +84,7 @@ func checkVariables(runner tflint.Runner, rule tflint.Rule) error {
 	cfg, _ := runner.Config()
 
 	for _, variable := range cfg.Module.Variables {
-		if variable.DeclRange.Filename != variablesFile {
+		if filepath.Base(variable.DeclRange.Filename) != variablesFilename {
 			if err := runner.EmitIssue(
 				rule,
 				fmt.Sprintf(
@@ -84,7 +92,10 @@ func checkVariables(runner tflint.Runner, rule tflint.Rule) error {
 					"variable",
 					variable.Name,
 					variable.DeclRange.Filename,
-					variablesFile,
+					filepath.Join(
+						filepath.Dir(variable.DeclRange.Filename),
+						variablesFilename,
+					),
 				),
 				variable.DeclRange,
 			); err != nil {
@@ -97,15 +108,21 @@ func checkVariables(runner tflint.Runner, rule tflint.Rule) error {
 }
 
 func checkOutputsFile(runner tflint.Runner, rule tflint.Rule) error {
-	file, err := runner.File(outputsFile)
+	files, err := runner.Files()
 	if err != nil {
 		return err
 	}
-	if file == nil {
+	var outputsFile *hcl.File
+	for filename, file := range files {
+		if filepath.Base(filename) == outputsFilename {
+			outputsFile = file
+		}
+	}
+	if outputsFile == nil {
 		return nil
 	}
 
-	body, ok := file.Body.(*hclsyntax.Body)
+	body, ok := outputsFile.Body.(*hclsyntax.Body)
 	if !ok {
 		return nil
 	}
@@ -115,7 +132,7 @@ func checkOutputsFile(runner tflint.Runner, rule tflint.Rule) error {
 				rule,
 				fmt.Sprintf(
 					wrongResourceTypeMessageTemplate,
-					outputsFile,
+					block.Range().Filename,
 					"outputs",
 				),
 				block.Range(),
@@ -131,7 +148,7 @@ func checkOutputsFile(runner tflint.Runner, rule tflint.Rule) error {
 func checkOutputs(runner tflint.Runner, rule tflint.Rule) error {
 	outputs := getOutputs(runner)
 	for _, output := range outputs {
-		if output.DeclRange.Filename != outputsFile {
+		if filepath.Base(output.DeclRange.Filename) != outputsFilename {
 			if err := runner.EmitIssue(
 				rule,
 				fmt.Sprintf(
@@ -139,7 +156,10 @@ func checkOutputs(runner tflint.Runner, rule tflint.Rule) error {
 					"output",
 					output.Name,
 					output.DeclRange.Filename,
-					outputsFile,
+					filepath.Join(
+						filepath.Dir(output.DeclRange.Filename),
+						outputsFilename,
+					),
 				),
 				output.DeclRange,
 			); err != nil {
