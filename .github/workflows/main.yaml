@@ -21,7 +21,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
     - name: Set up Go
-      uses: actions/setup-go@v2
+      uses: actions/setup-go@v3
       with:
         go-version: ${{ env.GOLANG_VERSION }}
     - uses: actions/cache@v2
@@ -59,7 +59,7 @@ jobs:
       with:
         fetch-depth: 0
     - name: Set up Go
-      uses: actions/setup-go@v2
+      uses: actions/setup-go@v3
       with:
         go-version: ${{ env.GOLANG_VERSION }}
     - uses: actions/cache@v2
