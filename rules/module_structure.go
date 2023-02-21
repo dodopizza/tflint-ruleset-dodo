@@ -6,7 +6,7 @@ import (
 
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hclsyntax"
-	"github.com/terraform-linters/tflint-plugin-sdk/terraform/configs"
+	"github.com/hashicorp/terraform/internal/configs"
 	"github.com/terraform-linters/tflint-plugin-sdk/tflint"
 )
 

@@ -2,7 +2,7 @@ package rules
 
 import (
 	"github.com/hashicorp/hcl/v2"
-	"github.com/terraform-linters/tflint-plugin-sdk/terraform/configs"
+	"github.com/hashicorp/terraform/internal/configs"
 	"github.com/terraform-linters/tflint-plugin-sdk/tflint"
 )
 
