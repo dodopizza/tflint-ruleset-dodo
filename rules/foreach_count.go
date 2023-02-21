@@ -21,10 +21,7 @@ func NewForeachCountRule() *Rule {
 						Type:       "resource",
 						LabelNames: []string{"type", "name"},
 						Body: &hclext.BodySchema{
-							Attributes: []hclext.AttributeSchema{
-								{Name: "for_each"},
-								{Name: "count"},
-							},
+							Mode: hclext.SchemaJustAttributesMode,
 						},
 					},
 				},
@@ -35,6 +32,8 @@ func NewForeachCountRule() *Rule {
 
 			for _, block := range resource.Blocks {
 				resource_block_start := block.DefRange.Start.Line
+				var firstAttr *hclext.Attribute
+
 				for _, attr := range block.Body.Attributes {
 					if attr.Name == "for_each" || attr.Name == "count" {
 
@@ -47,37 +46,27 @@ func NewForeachCountRule() *Rule {
 							)
 						}
 
-						// Check if for_each or count is delimited by empty line
+						firstAttr = attr
+					}
+				}
+
+				// Check if for_each or count is delimited by empty line
+				if firstAttr == nil {
+					continue
+				}
+				for _, attr := range block.Body.Attributes {
+					if attr == firstAttr {
+						continue
+					}
+					if attr.Range.Start.Line-firstAttr.Range.End.Line < 2 {
+						runner.EmitIssue(
+							rule,
+							foreachCountDelimitedMessage,
+							attr.Range,
+						)
 					}
 				}
 			}
-
-			_ = resource
-
-			// resources, err := runner.GetResourceContent(
-			// 	"",
-			// 	&hclext.BodySchema{
-			// 		Attributes: []hclext.AttributeSchema{
-			// 			{Name: "resource"},
-			// 		},
-			// 	},
-			// 	nil,
-			// )
-			// if err != nil {
-			// 	return err
-			// }
-
-			// logger.Debug(fmt.Sprintf("Get %d instances", len(resources.Blocks)))
-
-			// for _, resource := range resources.Blocks {
-			// 	if resource.Body.Attributes["resource"].Range.Start.Line != 1 {
-			// 		runner.EmitIssue(
-			// 			rule,
-			// 			foreachCountFirstArgumentMessage,
-			// 			resource.Body.Attributes["resource"].Range,
-			// 		)
-			// 	}
-			// }
 
 			return nil
 		},

@@ -12,7 +12,30 @@ func Test_NewForeachCountRule(t *testing.T) {
 		Content  string
 		Expected helper.Issues
 	}{
-
+		// 		{
+		// 			Name: "no issues nested for_each",
+		// 			Content: `
+		// resource "null_resource" "test" {
+		// 	name = "test"
+		// 	dynamic "config" {
+		// 		for_each = toset([1, 2, 3, 4, 5])
+		// 		content {
+		// 			key = value
+		// 		}
+		// 	}
+		// }
+		// `,
+		// 			Expected: helper.Issues{},
+		// 		},
+		{
+			Name: "no for_each or count",
+			Content: `
+resource "null_resource" "test" {
+  name = "test"
+}
+`,
+			Expected: helper.Issues{},
+		},
 		{
 			Name: "no issues for_each",
 			Content: `
@@ -25,10 +48,33 @@ resource "null_resource" "test" {
 			Expected: helper.Issues{},
 		},
 		{
-			Name: "no for_each or count",
+			Name: "no issues for_each multiline map",
 			Content: `
 resource "null_resource" "test" {
-  name = "test"
+	for_each = {
+		test = "test"
+		key  = "value"
+	}
+
+  name        = each.key
+	description = each.value
+}
+`,
+			Expected: helper.Issues{},
+		},
+
+		{
+			Name: "no issues for_each for var",
+			Content: `
+locals {
+	test = {
+		name = "value"
+	}
+}
+resource "null_resource" "test" {
+  for_each = { for t in local.t : t.name => t }
+
+  name = each.value
 }
 `,
 			Expected: helper.Issues{},
