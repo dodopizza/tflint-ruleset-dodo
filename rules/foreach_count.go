@@ -1,8 +1,7 @@
 package rules
 
 import (
-	"github.com/hashicorp/hcl/v2"
-	"github.com/terraform-linters/tflint-plugin-sdk/terraform/configs"
+	"github.com/terraform-linters/tflint-plugin-sdk/hclext"
 	"github.com/terraform-linters/tflint-plugin-sdk/tflint"
 )
 
@@ -15,66 +14,72 @@ func NewForeachCountRule() *Rule {
 	return NewRule(
 		"foreach_count",
 		func(runner tflint.Runner, rule tflint.Rule) error {
-			cfg, _ := runner.Config()
-			for _, res := range cfg.Module.ManagedResources {
-				r, ok := findForeachCount(res)
-				if !ok {
-					continue
-				}
 
-				if r.Start.Line-res.DeclRange.End.Line != 1 {
-					if err := runner.EmitIssue(
-						rule,
-						foreachCountFirstArgumentMessage,
-						r,
-					); err != nil {
-						return err
-					}
+			resource, err := runner.GetModuleContent(&hclext.BodySchema{
+				Blocks: []hclext.BlockSchema{
+					{
+						Type:       "resource",
+						LabelNames: []string{"type", "name"},
+						Body: &hclext.BodySchema{
+							Attributes: []hclext.AttributeSchema{
+								{Name: "for_each"},
+								{Name: "count"},
+							},
+						},
+					},
+				},
+			}, nil)
+			if err != nil {
+				return err
+			}
 
-					return nil
-				}
+			for _, block := range resource.Blocks {
+				resource_block_start := block.DefRange.Start.Line
+				for _, attr := range block.Body.Attributes {
+					if attr.Name == "for_each" || attr.Name == "count" {
 
-				attrs, _ := res.Config.JustAttributes()
-				var firstAttr *hcl.Attribute
-				for _, attr := range attrs {
-					if attr.Name == "for_each" ||
-						attr.Name == "count" {
-						continue
-					}
+						// Check if for_each or count is first argument
+						if attr.Range.Start.Line != resource_block_start+1 {
+							runner.EmitIssue(
+								rule,
+								foreachCountFirstArgumentMessage,
+								attr.Range,
+							)
+						}
 
-					if firstAttr == nil ||
-						attr.Range.Start.Line < firstAttr.Range.Start.Line {
-						firstAttr = attr
-					}
-				}
-
-				if firstAttr.Range.Start.Line-r.End.Line != 2 {
-					if err := runner.EmitIssue(
-						rule,
-						foreachCountDelimitedMessage,
-						r,
-					); err != nil {
-						return err
+						// Check if for_each or count is delimited by empty line
 					}
 				}
 			}
 
+			_ = resource
+
+			// resources, err := runner.GetResourceContent(
+			// 	"",
+			// 	&hclext.BodySchema{
+			// 		Attributes: []hclext.AttributeSchema{
+			// 			{Name: "resource"},
+			// 		},
+			// 	},
+			// 	nil,
+			// )
+			// if err != nil {
+			// 	return err
+			// }
+
+			// logger.Debug(fmt.Sprintf("Get %d instances", len(resources.Blocks)))
+
+			// for _, resource := range resources.Blocks {
+			// 	if resource.Body.Attributes["resource"].Range.Start.Line != 1 {
+			// 		runner.EmitIssue(
+			// 			rule,
+			// 			foreachCountFirstArgumentMessage,
+			// 			resource.Body.Attributes["resource"].Range,
+			// 		)
+			// 	}
+			// }
+
 			return nil
 		},
 	)
-}
-
-func findForeachCount(res *configs.Resource) (hcl.Range, bool) {
-	var r hcl.Range
-	if res.ForEach != nil {
-		r = res.ForEach.Range()
-	}
-	if res.Count != nil {
-		r = res.Count.Range()
-	}
-	if r.Start.Line == 0 {
-		return r, false
-	}
-
-	return r, true
 }
