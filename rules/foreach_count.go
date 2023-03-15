@@ -32,39 +32,48 @@ func NewForeachCountRule() *Rule {
 
 			for _, block := range resource.Blocks {
 				resource_block_start := block.DefRange.Start.Line
-				var firstAttr *hclext.Attribute
+				var foreachCountAttribute *hclext.Attribute
 
 				for _, attr := range block.Body.Attributes {
 					if attr.Name == "for_each" || attr.Name == "count" {
 
 						// Check if for_each or count is first argument
 						if attr.Range.Start.Line != resource_block_start+1 {
-							runner.EmitIssue(
+							return runner.EmitIssue(
 								rule,
 								foreachCountFirstArgumentMessage,
 								attr.Range,
 							)
 						}
 
-						firstAttr = attr
+						foreachCountAttribute = attr
 					}
 				}
 
 				// Check if for_each or count is delimited by empty line
-				if firstAttr == nil {
+				if foreachCountAttribute == nil {
 					continue
 				}
+
+				var firstAttr *hclext.Attribute
 				for _, attr := range block.Body.Attributes {
-					if attr == firstAttr {
+					if attr.Name == "for_each" ||
+						attr.Name == "count" {
 						continue
 					}
-					if attr.Range.Start.Line-firstAttr.Range.End.Line < 2 {
-						runner.EmitIssue(
-							rule,
-							foreachCountDelimitedMessage,
-							attr.Range,
-						)
+
+					if firstAttr == nil ||
+						attr.Range.Start.Line < firstAttr.Range.Start.Line {
+						firstAttr = attr
 					}
+				}
+
+				if firstAttr.Range.Start.Line-foreachCountAttribute.Range.End.Line != 2 {
+					return runner.EmitIssue(
+						rule,
+						foreachCountDelimitedMessage,
+						firstAttr.Range,
+					)
 				}
 			}
 
