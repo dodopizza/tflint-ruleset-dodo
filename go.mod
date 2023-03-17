@@ -1,6 +1,6 @@
 module github.com/dodopizza/tflint-ruleset-dodo
 
-go 1.20
+go 1.17
 
 require (
 	github.com/hashicorp/hcl/v2 v2.15.0
