@@ -32,10 +32,13 @@ terraform {
 			Name: "issue found",
 			Content: `
 terraform {
-  backend "s3" {
-		bucket = "mybucket"
-		key    = "path/to/my/key"
-    region = "us-east-1"
+  backend "oss" {
+	bucket = "bucket-for-terraform-state"
+	prefix   = "path/mystate"
+	key   = "version-1.tfstate"
+	region = "cn-beijing"
+	tablestore_endpoint = "https://terraform-remote.cn-hangzhou.ots.aliyuncs.com"
+	tablestore_table = "statelock"
   }
 }`,
 			Expected: helper.Issues{
@@ -44,15 +47,27 @@ terraform {
 					Message: fmt.Sprintf(
 						backendTypeMessageTemplate,
 						requiredBackendType,
-						"s3",
+						"oss",
 					),
 					Range: hcl.Range{
 						Filename: filename,
 						Start:    hcl.Pos{Line: 3, Column: 3},
-						End:      hcl.Pos{Line: 3, Column: 15},
+						End:      hcl.Pos{Line: 3, Column: 16},
 					},
 				},
 			},
+		},
+		{
+			Name: "no issues",
+			Content: `
+terraform {
+  backend "s3" {
+		bucket = "mybucket"
+		key    = "path/to/my/key"
+    region = "us-east-1"
+  }
+}`,
+			Expected: helper.Issues{},
 		},
 	}
 

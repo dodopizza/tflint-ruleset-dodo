@@ -32,7 +32,7 @@ func NewBackendTypeRule() *Rule {
 			}
 
 			for _, backend := range body.Blocks {
-				if backend.Type != requiredBackendType || backend.Labels[0] != requiredYCBackendType {
+				if backend.Type != requiredYCBackendType && backend.Type != requiredBackendType {
 					return runner.EmitIssue(
 						rule,
 						fmt.Sprintf(
