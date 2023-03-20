@@ -17,31 +17,37 @@ func NewBackendTypeRule() *Rule {
 	return NewRule(
 		"backend_type",
 		func(runner tflint.Runner, rule tflint.Rule) error {
-			body, err := runner.GetModuleContent(
-				&hclext.BodySchema{
-					Blocks: []hclext.BlockSchema{
-						{Type: "backend", LabelNames: []string{"type"}, Body: &hclext.BodySchema{
-							Attributes: []hclext.AttributeSchema{{Name: "key"}},
-						}},
+			content, err := runner.GetModuleContent(&hclext.BodySchema{
+				Blocks: []hclext.BlockSchema{
+					{
+						Type: "terraform",
+						Body: &hclext.BodySchema{
+							Blocks: []hclext.BlockSchema{
+								{
+									Type:       "backend",
+									LabelNames: []string{"type"},
+								},
+							},
+						},
 					},
 				},
-				&tflint.GetModuleContentOption{},
-			)
+			}, nil)
 			if err != nil {
 				return err
 			}
-
-			for _, backend := range body.Blocks {
-				if backend.Type != requiredYCBackendType && backend.Type != requiredBackendType {
-					return runner.EmitIssue(
-						rule,
-						fmt.Sprintf(
-							backendTypeMessageTemplate,
-							requiredBackendType,
-							backend.Type,
-						),
-						backend.DefRange,
-					)
+			for _, terraform := range content.Blocks {
+				for _, backend := range terraform.Body.Blocks {
+					if backend.Labels[0] != requiredYCBackendType && backend.Labels[0] != requiredBackendType {
+						return runner.EmitIssue(
+							rule,
+							fmt.Sprintf(
+								backendTypeMessageTemplate,
+								requiredBackendType,
+								backend.Labels[0],
+							),
+							backend.DefRange,
+						)
+					}
 				}
 			}
 
