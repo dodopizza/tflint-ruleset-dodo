@@ -45,13 +45,13 @@ func (rule *Rule) Metadata() interface{} {
 }
 
 func (rule *Rule) Check(runner tflint.Runner) error {
-	// config, err := runner.Config()
+	// Config, err := runner.Config()
 	// if err != nil {
 	// 	return err
 	// }
 
 	// // Check if it is child module and do not evaluate them.
-	// if len(config.Path) != 0 {
+	// If len(config.Path) != 0 {
 	// 	return nil
 	// }
 

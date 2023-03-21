@@ -113,6 +113,7 @@ func checkVariables(runner tflint.Runner, rule tflint.Rule) error {
 			}
 		}
 	}
+
 	return nil
 }
 
