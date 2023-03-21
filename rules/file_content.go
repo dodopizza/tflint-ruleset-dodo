@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/hashicorp/hcl/v2"
+	hcl "github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hclsyntax"
 	"github.com/terraform-linters/tflint-plugin-sdk/tflint"
 )
@@ -19,7 +19,7 @@ func NewFileContentRule() *Rule {
 	return NewRule(
 		"file_content",
 		func(runner tflint.Runner, rule tflint.Rule) error {
-			files, err := runner.Files()
+			files, err := runner.GetFiles()
 			if err != nil {
 				return err
 			}

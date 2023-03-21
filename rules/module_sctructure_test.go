@@ -84,7 +84,7 @@ func Test_ModuleStructure(t *testing.T) {
 						},
 						End: hcl.Pos{
 							Line:   1,
-							Column: 31,
+							Column: 14,
 						},
 					},
 				},

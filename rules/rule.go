@@ -9,11 +9,10 @@ import (
 const rulePrefix = "dodo"
 
 type Rule struct {
+	tflint.Rule
 	name      string
 	checkFunc func(tflint.Runner, tflint.Rule) error
 }
-
-var _ tflint.Rule = &Rule{}
 
 func NewRule(
 	name string,
@@ -33,7 +32,7 @@ func (rule *Rule) Enabled() bool {
 	return true
 }
 
-func (rule *Rule) Severity() string {
+func (rule *Rule) Severity() tflint.Severity {
 	return tflint.ERROR
 }
 
@@ -41,16 +40,20 @@ func (rule *Rule) Link() string {
 	return ""
 }
 
-func (rule *Rule) Check(runner tflint.Runner) error {
-	config, err := runner.Config()
-	if err != nil {
-		return err
-	}
+func (rule *Rule) Metadata() interface{} {
+	return nil
+}
 
-	// Check if it is child module and do not evaluate them.
-	if len(config.Path) != 0 {
-		return nil
-	}
+func (rule *Rule) Check(runner tflint.Runner) error {
+	// Config, err := runner.Config()
+	// if err != nil {
+	// 	return err
+	// }
+
+	// // Check if it is child module and do not evaluate them.
+	// If len(config.Path) != 0 {
+	// 	return nil
+	// }
 
 	return rule.checkFunc(runner, rule)
 }

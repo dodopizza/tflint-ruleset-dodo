@@ -31,4 +31,3 @@ All rules enabled by default and have `ERROR` severity.
 | dodo_comments | Check that all comments written in consistent way. |
 | dodo_file_content | Check that all files looks similarly, mostly focused on vertical alignment |
 | dodo_terraform_backend_type | Check that modules specify `azurerm` as backend type |
-| dodo_foreach_count | If resource have `for_each` or `count` expression check that they go as first argument and delimited by newline after it |
