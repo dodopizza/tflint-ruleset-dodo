@@ -3,7 +3,7 @@ package rules
 import (
 	"testing"
 
-	"github.com/hashicorp/hcl/v2"
+	hcl "github.com/hashicorp/hcl/v2"
 	"github.com/stretchr/testify/require"
 	"github.com/terraform-linters/tflint-plugin-sdk/helper"
 )
