@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	github.com/hashicorp/hcl/v2 v2.11.1
-	github.com/stretchr/testify v1.7.0
+	github.com/stretchr/testify v1.8.4
 	github.com/terraform-linters/tflint-plugin-sdk v0.9.1
 )
 
@@ -36,5 +36,5 @@ require (
 	google.golang.org/appengine v1.6.5 // indirect
 	google.golang.org/genproto v0.0.0-20190819201941-24fa4b261c55 // indirect
 	google.golang.org/grpc v1.27.1 // indirect
-	gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
